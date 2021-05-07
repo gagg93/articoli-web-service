@@ -19,12 +19,14 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
+    //metodi per tutti
     @GetMapping("/vehicles")
     public List<Vehicle> getVehicles() {
 
         return vehicleService.findAll();
     }
 
+    //metodi admin
     @GetMapping("/vehicles/targa/{targa}")
     public Vehicle getVehicleById(@PathVariable String targa) {
         return vehicleService.findByTarga(targa);
@@ -35,8 +37,8 @@ public class VehicleController {
         return vehicleService.findById(id);
     }
 
-    @PostMapping("/vehicles")
-    public String getVehicleById(@RequestBody Vehicle vehicle) throws Exception {
+    @PostMapping("/vehicles/new")
+    public String getVehicleById(@RequestBody Vehicle vehicle) {
         try{
             vehicleService.updateVehicle(vehicle);
         }catch (Exception e){
@@ -45,8 +47,8 @@ public class VehicleController {
         return "ok";
     }
 
-    @PutMapping("/vehicles")
-    public String editVehicleById(@RequestBody Vehicle vehicle) throws Exception {
+    @PutMapping("/vehicles/{id}")
+    public String editVehicleById(@RequestBody Vehicle vehicle) {
         try{
             vehicleService.updateVehicle(vehicle);
         }catch (Exception e){
@@ -54,7 +56,6 @@ public class VehicleController {
         }
         return "ok";
     }
-
 
     @DeleteMapping("/vehicles/{id}")
     public void deleteVehicleById(@PathVariable int id) {

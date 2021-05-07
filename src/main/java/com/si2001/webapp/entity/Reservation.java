@@ -2,6 +2,7 @@ package com.si2001.webapp.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -30,14 +31,15 @@ public class Reservation implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "data_di_fine")
     private Date resEnd;
-    @Column
-    private boolean approved;
+    @Column(name = "approvata")
+    @Nullable
+    private Boolean approved;
 
-    public boolean isApproved() {
+    public Boolean isApproved() {
         return approved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         this.approved = approved;
     }
 

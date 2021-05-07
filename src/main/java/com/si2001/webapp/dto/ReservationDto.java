@@ -11,13 +11,13 @@ public class ReservationDto implements Serializable {
     private String vehicle;
     private Date resBegin;
     private Date resEnd;
-    private boolean approved;
+    private Boolean approved;
 
-    public boolean isApproved() {
+    public Boolean isApproved() {
         return approved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         this.approved = approved;
     }
 
