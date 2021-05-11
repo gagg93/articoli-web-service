@@ -1,14 +1,17 @@
 package com.si2001.webapp.controller;
 
+import com.si2001.webapp.dto.UserDto;
 import com.si2001.webapp.entity.User;
 import com.si2001.webapp.security.JwtUtil;
 import com.si2001.webapp.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 public class UserController {
 
 
@@ -26,13 +29,13 @@ public class UserController {
             return userService.findAll();
         }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("/users/username/{username}")
     public User getUserByUsername(@PathVariable String username) {
         return userService.findByUsername(username);
     }
 
     @PostMapping("/users/new")
-    public String getUserById(@RequestBody User user) {
+    public String getUserById(@RequestBody UserDto user) {
         try{
             userService.updateUser(user);
         }catch (Exception e){
@@ -46,9 +49,8 @@ public class UserController {
         return userService.findById(id);
     }
 
-
     @PutMapping("/users/{id}")
-    public String editUserById(@RequestBody User user){
+    public String editUserById(@RequestBody UserDto user){
         try{
             userService.updateUser(user);
         }catch (Exception e){
@@ -63,7 +65,7 @@ public class UserController {
     }
 
     //metodi customer
-    @GetMapping("/profile")
+    @GetMapping("/users/my/profile")
     public User getProfile(HttpServletRequest httpServletRequest) {
         final String authorizationHeader = httpServletRequest.getHeader("Authorization");
         String username= null;

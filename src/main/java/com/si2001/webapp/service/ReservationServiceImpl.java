@@ -59,6 +59,7 @@ public class ReservationServiceImpl implements ReservationService{
     @Override
     public void updateReservation(ReservationDto reservationDto) throws Exception {
         Reservation reservation = copyReservation(reservationDto);
+        reservation.setApproved(null);
         reservation.setId(reservationDto.getId());
         if(canBook(reservationDto)){
             repository.save(reservation);
@@ -98,14 +99,16 @@ public class ReservationServiceImpl implements ReservationService{
     public void approveReservation(int id) throws Exception {
         ReservationDto reservation= findById(id);
         reservation.setApproved(true);
-        saveReservation(reservation);
+        Reservation res = copyReservation(reservation);
+        repository.save(res);
     }
 
     @Override
     public void disapproveReservation(int id) throws Exception {
         ReservationDto reservation= findById(id);
         reservation.setApproved(false);
-        saveReservation(reservation);
+        Reservation res = copyReservation(reservation);
+        repository.save(res);
     }
 
     private boolean canBook(ReservationDto reservationDto) throws Exception {
@@ -137,8 +140,10 @@ public class ReservationServiceImpl implements ReservationService{
 
     private Reservation copyReservation(ReservationDto reservationDto) throws Exception {
         Reservation reservation = new Reservation();
+        reservation.setId(reservationDto.getId());
         reservation.setResBegin(reservationDto.getResBegin());
         reservation.setResEnd(reservationDto.getResEnd());
+        reservation.setApproved(reservationDto.isApproved());
         reservation.setUserId(userRepository.findUserByUsername(reservationDto.getUser()).orElseThrow(() -> new Exception("User not found " + reservationDto.getUser())));
         reservation.setVehicleId(vehicleRepository.findVehicleByTarga(reservationDto.getVehicle()).orElseThrow(() -> new Exception("Vehicle not found " + reservationDto.getVehicle())));
         return reservation;

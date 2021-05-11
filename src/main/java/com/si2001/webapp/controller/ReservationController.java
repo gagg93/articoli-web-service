@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 public class ReservationController {
 
     private final UserService userService;
@@ -44,24 +45,23 @@ public class ReservationController {
     }
 
 
-    @PostMapping("/approve/{id}")
-    public String approveReservation(@PathVariable int id) throws Exception {
+    @PostMapping("/reservations/approve/{id}")
+    public void approveReservation(@PathVariable int id) throws Exception {
         reservationService.approveReservation(id);
-        return "approved {id}";
     }
 
-    @PostMapping("/disapprove/{id}")
-    public String disapproveReservation(@PathVariable int id) throws Exception {
+    @PostMapping("/reservations/disapprove/{id}")
+    public void disapproveReservation(@PathVariable int id) throws Exception {
         reservationService.disapproveReservation(id);
-        return "disapproved {id}";
     }
 
     //metodi customer
     @GetMapping("/reservations/{id}")
-    public ReservationDto getReservationsById(@PathVariable int id, @RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
+    public ReservationDto getReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
-        if (id != reservation.getId() || !reservationDtos.contains(reservation)){
+        ReservationDto res = reservationService.findById(id);
+        if (reservationDtos.contains(res)){
             throw new Exception("stai provando ad hackerare");
         }
         return reservationService.findById(id);
@@ -71,23 +71,24 @@ public class ReservationController {
     public void editReservationsById(@PathVariable int id, @RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
-        if (id != reservation.getId() || !reservationDtos.contains(reservation)){
+        if (id != reservation.getId()){ //|| !reservationDtos.contains(reservation)){
             throw new Exception("stai provando ad hackerare");
         }
         reservationService.updateReservation(reservation);
     }
 
     @DeleteMapping("/reservations/{id}")
-    public void deleteReservationsById(@PathVariable int id, @RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
+    public void deleteReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
-        if (id != reservation.getId() || !reservationDtos.contains(reservation)){
+        ReservationDto reservation = reservationService.findById(id);
+        if (id != reservation.getId()){// || !reservationDtos.contains(reservation)){
             throw new Exception("stai provando ad hackerare");
         }
         reservationService.deleteReservation(id);
     }
 
-    @GetMapping("/myreservations")
+    @GetMapping("/reservations/my/self")
     public List<ReservationDto> getMyReservations(HttpServletRequest httpServletRequest) {
         User user=extractUserFromJwt(httpServletRequest);
 
@@ -108,7 +109,8 @@ public class ReservationController {
     @PostMapping("/reservations/new")
     public String saveNewReservations(@RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
-        if (reservation.getUser().equals(user.getUsername())){
+        reservation.setApproved(null);
+        if (!reservation.getUser().equals(user.getUsername())){
                 throw new Exception("stai provando ad hackerare");
             }
         try {

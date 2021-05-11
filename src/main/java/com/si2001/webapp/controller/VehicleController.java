@@ -5,11 +5,15 @@ package com.si2001.webapp.controller;
 import com.si2001.webapp.entity.Vehicle;
 
 import com.si2001.webapp.service.VehicleService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 public class VehicleController {
 
 
@@ -21,44 +25,49 @@ public class VehicleController {
 
     //metodi per tutti
     @GetMapping("/vehicles")
-    public List<Vehicle> getVehicles() {
+    public ResponseEntity<List<Vehicle>> getVehicles() {
 
-        return vehicleService.findAll();
+        return new ResponseEntity<>(vehicleService.findAll(), new HttpHeaders(), HttpStatus.OK);
     }
 
     //metodi admin
     @GetMapping("/vehicles/targa/{targa}")
-    public Vehicle getVehicleById(@PathVariable String targa) {
-        return vehicleService.findByTarga(targa);
+    public ResponseEntity<Vehicle> getVehicleById(@PathVariable String targa) {
+        return new ResponseEntity<>(vehicleService.findByTarga(targa), new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/vehicles/{id}")
-    public Vehicle getVehicleById(@PathVariable int id) {
-        return vehicleService.findById(id);
+    public ResponseEntity<Vehicle> getVehicleById(@PathVariable int id) {
+        return new ResponseEntity<>(vehicleService.findById(id), new HttpHeaders(), HttpStatus.OK);
     }
 
     @PostMapping("/vehicles/new")
-    public String getVehicleById(@RequestBody Vehicle vehicle) {
+    public ResponseEntity<?> newVehicle(@RequestBody Vehicle vehicle) {
         try{
             vehicleService.updateVehicle(vehicle);
         }catch (Exception e){
-            return e.getMessage();
+            return new ResponseEntity<>(new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "ok";
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.CREATED);
     }
 
     @PutMapping("/vehicles/{id}")
-    public String editVehicleById(@RequestBody Vehicle vehicle) {
+    public ResponseEntity<?> editVehicleById(@RequestBody Vehicle vehicle) {
         try{
             vehicleService.updateVehicle(vehicle);
         }catch (Exception e){
-            return e.getMessage();
+            return new ResponseEntity<>(new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "ok";
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 
     @DeleteMapping("/vehicles/{id}")
-    public void deleteVehicleById(@PathVariable int id) {
-        vehicleService.deleteVehicle(id);
+    public ResponseEntity<?> deleteVehicleById(@PathVariable int id) {
+        try{
+            vehicleService.deleteVehicle(id);
+        }catch (Exception e){
+            return new ResponseEntity<>(new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 }

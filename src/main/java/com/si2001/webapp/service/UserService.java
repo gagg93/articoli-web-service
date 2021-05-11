@@ -1,5 +1,6 @@
 package com.si2001.webapp.service;
 
+import com.si2001.webapp.dto.UserDto;
 import com.si2001.webapp.entity.User;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface UserService {
 
         User findById(int id);
 
-        void updateUser(User user) throws Exception;
+        void updateUser(UserDto user) throws Exception;
 
         void deleteUser(int id);
 

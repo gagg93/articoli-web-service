@@ -1,7 +1,9 @@
 package com.si2001.webapp.service;
 
+import com.si2001.webapp.dto.UserDto;
 import com.si2001.webapp.entity.User;
 import com.si2001.webapp.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +14,11 @@ public class UserServiceImpl implements UserService{
 
 
     private final UserRepository repository;
+    private final PasswordEncoder encoder;
 
-    public UserServiceImpl(UserRepository repository) {
+    public UserServiceImpl(UserRepository repository, PasswordEncoder encoder) {
         this.repository = repository;
+        this.encoder = encoder;
     }
 
     @Override
@@ -30,9 +34,23 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void updateUser(User user) throws Exception {
+    public void updateUser(UserDto userDto) throws Exception {
+        User user = new User();
+        user.setAdmin(userDto.isAdmin());
+        user.setUsername(userDto.getUsername());
+        if (userDto.getId()== 0){
+            user.setPassword(encoder.encode(userDto.getPassword()));
+        }
+        user.setBirthDate(userDto.getBirthDate());
+        user.setId(userDto.getId());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
         Optional<User> temp = repository.findUserByUsername(user.getUsername());
         if (!temp.isPresent() || temp.get().getId() == user.getId()) {
+            if (temp.isPresent() && temp.get().getId() == user.getId()){
+                user.setPassword(temp.get().getPassword());
+                user.setReservationSet(user.getReservationSet());
+            }
             repository.save(user);
         }else{
             throw new Exception("Username occupato");

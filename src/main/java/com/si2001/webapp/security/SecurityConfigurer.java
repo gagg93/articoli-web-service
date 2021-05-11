@@ -21,20 +21,21 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         this.myUserDetailsService = myUserDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
     }
-//TODO
-    private static final String[] BOTH_MATCHER = { "/authenticate", "/", "/vehicles"};
-    private static final String[] USER_MATCHER = { "/hello", "/reservations/new", "/profile", "/myreservations", "/reservations/{id}"};
+
+    private static final String[] BOTH_MATCHER = { "/authenticate", "/" };
+    private static final String[] USER_MATCHER = { "/hello", "/reservations/new", "/users/my/profile", "/reservations/my/self", "/reservations/{id}"};
     private static final String[] ADMIN_MATCHER = { "/helloadmin", "/users", "/users/{id}", "/username/{username}", "/users/new",
             "/vehicles/targa/{targa}", "/vehicles/{id}", "/vehicles/new",
             "/reservations", "/reservations/vehicle/{id}", "/reservations/user/{id}",
-            "/approve/{id}", "/disapprove/{id}"};
+            "/reservations/approve/{id}", "/reservations/disapprove/{id}"};
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.cors().and().csrf().disable()
                 .authorizeRequests().antMatchers(BOTH_MATCHER).permitAll()
                 .antMatchers(ADMIN_MATCHER).hasRole("ADMIN")
                 .antMatchers(USER_MATCHER).hasRole("USER")
+                .antMatchers("/vehicles").hasAnyRole("ADMIN","USER")
                 .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().formLogin();
