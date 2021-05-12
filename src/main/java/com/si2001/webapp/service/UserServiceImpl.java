@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService{
         if (!temp.isPresent() || temp.get().getId() == user.getId()) {
             if (temp.isPresent() && temp.get().getId() == user.getId()){
                 user.setPassword(temp.get().getPassword());
-                user.setReservationSet(user.getReservationSet());
+                user.setReservationSet(temp.get().getReservationSet());
             }
             repository.save(user);
         }else{

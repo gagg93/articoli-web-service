@@ -7,6 +7,9 @@ import com.si2001.webapp.security.JwtUtil;
 import com.si2001.webapp.service.ReservationService;
 
 import com.si2001.webapp.service.UserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,72 +30,74 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationDto> getReservations() {
-
-        return (reservationService.findAll());
+    public ResponseEntity<List<ReservationDto>> getReservations() {
+        return new ResponseEntity<>(reservationService.findAll(), new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/reservations/vehicle/{id}")
-    public List<ReservationDto> getReservationsByVehicle(@PathVariable int id) {
-
-        return reservationService.findByVehicleId(id);
+    public ResponseEntity<List<ReservationDto>> getReservationsByVehicle(@PathVariable int id) {
+        return new ResponseEntity<>(reservationService.findByVehicleId(id), new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/reservations/user/{id}")
-    public List<ReservationDto> getReservationsByUser(@PathVariable int id) {
-
-        return reservationService.findByUserId(id);
+    public ResponseEntity<List<ReservationDto>> getReservationsByUser(@PathVariable int id) {
+        return new ResponseEntity<>(reservationService.findByUserId(id), new HttpHeaders(), HttpStatus.OK);
     }
 
 
     @PostMapping("/reservations/approve/{id}")
-    public void approveReservation(@PathVariable int id) throws Exception {
+    public ResponseEntity<?> approveReservation(@PathVariable int id) throws Exception {
         reservationService.approveReservation(id);
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 
     @PostMapping("/reservations/disapprove/{id}")
-    public void disapproveReservation(@PathVariable int id) throws Exception {
+    public ResponseEntity<?> disapproveReservation(@PathVariable int id) throws Exception {
         reservationService.disapproveReservation(id);
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 
     //metodi customer
     @GetMapping("/reservations/{id}")
-    public ReservationDto getReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
+    public ResponseEntity<ReservationDto> getReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
         ReservationDto res = reservationService.findById(id);
         if (reservationDtos.contains(res)){
-            throw new Exception("stai provando ad hackerare");
+            return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
         }
-        return reservationService.findById(id);
+        return new ResponseEntity<>(reservationService.findById(id), new HttpHeaders(), HttpStatus.OK);
+
     }
 
     @PutMapping("/reservations/{id}")
-    public void editReservationsById(@PathVariable int id, @RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
+    public ResponseEntity<?> editReservationsById(@PathVariable int id, @RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
         if (id != reservation.getId()){ //|| !reservationDtos.contains(reservation)){
-            throw new Exception("stai provando ad hackerare");
+            return new ResponseEntity<>("stai hackerando", new HttpHeaders(), HttpStatus.BAD_REQUEST);
         }
         reservationService.updateReservation(reservation);
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 
     @DeleteMapping("/reservations/{id}")
-    public void deleteReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
+    public ResponseEntity<?> deleteReservationsById(@PathVariable int id, HttpServletRequest httpServletRequest) throws Exception {
         User user = extractUserFromJwt(httpServletRequest);
         List<ReservationDto> reservationDtos = reservationService.findByUserId(userService.findByUsername(user.getUsername()).getId());
         ReservationDto reservation = reservationService.findById(id);
         if (id != reservation.getId()){// || !reservationDtos.contains(reservation)){
-            throw new Exception("stai provando ad hackerare");
+            return new ResponseEntity<>("stai hackerando", new HttpHeaders(), HttpStatus.BAD_REQUEST);
+
         }
         reservationService.deleteReservation(id);
+        return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/reservations/my/self")
-    public List<ReservationDto> getMyReservations(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<List<ReservationDto>> getMyReservations(HttpServletRequest httpServletRequest) {
         User user=extractUserFromJwt(httpServletRequest);
-
-        return reservationService.findByUserId(user.getId());
+        return new ResponseEntity<>(reservationService.findByUserId(user.getId()), new HttpHeaders(), HttpStatus.OK);
     }
 
     private User extractUserFromJwt(HttpServletRequest httpServletRequest) {
@@ -107,18 +112,18 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations/new")
-    public String saveNewReservations(@RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest) throws Exception {
+    public ResponseEntity<String> saveNewReservations(@RequestBody ReservationDto reservation, HttpServletRequest httpServletRequest){
         User user = extractUserFromJwt(httpServletRequest);
         reservation.setApproved(null);
         if (!reservation.getUser().equals(user.getUsername())){
-                throw new Exception("stai provando ad hackerare");
+            return new ResponseEntity<>("stai hackerando", new HttpHeaders(), HttpStatus.BAD_REQUEST);
             }
         try {
             reservationService.saveReservation(reservation);
         }catch (Exception e){
-            return e.getMessage();
+            return new ResponseEntity<>("problemi", new HttpHeaders(), HttpStatus.BAD_REQUEST);
         }
-        return "ok";
+        return new ResponseEntity<>("ok", new HttpHeaders(), HttpStatus.OK);
     }
 
 

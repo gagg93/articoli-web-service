@@ -4,6 +4,9 @@ import com.si2001.webapp.dto.UserDto;
 import com.si2001.webapp.entity.User;
 import com.si2001.webapp.security.JwtUtil;
 import com.si2001.webapp.service.UserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,56 +27,78 @@ public class UserController {
     }
 
     @GetMapping("/users")
-        public List<User> getUsers() {
+        public ResponseEntity<List<User>> getUsers() {
 
-            return userService.findAll();
+            return new ResponseEntity<>(userService.findAll(), new HttpHeaders(), HttpStatus.OK);
         }
 
     @GetMapping("/users/username/{username}")
-    public User getUserByUsername(@PathVariable String username) {
-        return userService.findByUsername(username);
+    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+        return new ResponseEntity<>(userService.findByUsername(username), new HttpHeaders(), HttpStatus.OK);
     }
 
     @PostMapping("/users/new")
-    public String getUserById(@RequestBody UserDto user) {
+    public ResponseEntity<String> getUserById(@RequestBody UserDto user) {
         try{
             userService.updateUser(user);
         }catch (Exception e){
-            return e.getMessage();
+            return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "ok";
+        return new ResponseEntity<>("ok", new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable int id) {
-        return userService.findById(id);
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
+        return new ResponseEntity<>(userService.findById(id), new HttpHeaders(), HttpStatus.OK);
     }
 
     @PutMapping("/users/{id}")
-    public String editUserById(@RequestBody UserDto user){
+    public ResponseEntity<String> editUserById(@RequestBody UserDto user){
         try{
             userService.updateUser(user);
         }catch (Exception e){
-            return e.getMessage();
+            return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "ok";
+        return new ResponseEntity<>("ok", new HttpHeaders(), HttpStatus.OK);
     }
 
     @DeleteMapping("/users/{id}")
-    public void deleteUserById(@PathVariable int id) {
+    public ResponseEntity<?> deleteUserById(@PathVariable int id) {
         userService.deleteUser(id);
+        return new ResponseEntity<>( new HttpHeaders(), HttpStatus.OK);
     }
 
     //metodi customer
     @GetMapping("/users/my/profile")
-    public User getProfile(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<User> getProfile(HttpServletRequest httpServletRequest) {
         final String authorizationHeader = httpServletRequest.getHeader("Authorization");
-        String username= null;
+        String username;
         String jwt;
         if (authorizationHeader!= null && authorizationHeader.startsWith("Bearer ")){
             jwt= authorizationHeader.substring(7);
             username = jwtUtil.extractUsername(jwt);
+            return new ResponseEntity<>(userService.findByUsername(username), new HttpHeaders(), HttpStatus.OK);
         }
-        return userService.findByUsername(username);
+        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("/users/my/profile")
+    public ResponseEntity<?> editProfile(@RequestBody UserDto user, HttpServletRequest httpServletRequest){
+        final String authorizationHeader = httpServletRequest.getHeader("Authorization");
+        String username;
+        String jwt;
+        if (authorizationHeader!= null && authorizationHeader.startsWith("Bearer ")){
+            jwt= authorizationHeader.substring(7);
+            username = jwtUtil.extractUsername(jwt);
+            if (username.equals(user.getUsername())){
+                try{
+                    userService.updateUser(user);
+                }catch (Exception e){
+                    return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(null, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

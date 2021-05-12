@@ -33,6 +33,7 @@ public class VehicleServiceImpl implements VehicleService{
     public void updateVehicle(Vehicle vehicle) throws Exception {
         Optional<Vehicle> temp = repository.findVehicleByTarga(vehicle.getTarga());
         if (!temp.isPresent() || temp.get().getId() == vehicle.getId()) {
+            temp.ifPresent(value -> vehicle.setReservationSet(value.getReservationSet()));
             repository.save(vehicle);
         }else{
             throw new Exception("targa precedentemente immatricolata");
