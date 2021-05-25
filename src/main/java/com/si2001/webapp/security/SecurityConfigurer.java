@@ -22,7 +22,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
-    private static final String[] BOTH_MATCHER = { "/authenticate", "/" };
+    private static final String[] BOTH_MATCHER = { "/login", "/" };
     private static final String[] USER_MATCHER = { "/hello", "/reservations/new", "/users/my/profile", "/reservations/my/self", "/reservations/{id}"};
     private static final String[] ADMIN_MATCHER = { "/helloadmin", "/users", "/users/{id}", "/username/{username}", "/users/new",
             "/vehicles/targa/{targa}", "/vehicles/{id}", "/vehicles/new",
